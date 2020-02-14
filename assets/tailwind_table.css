@@ -1,0 +1,19 @@
+.table {
+  @apply w-full;
+}
+
+.table th,
+.table td {
+  @apply py-3;
+  @apply border;
+  @apply text-sm;
+}
+
+.table th {
+  @apply text-center;
+}
+
+.table td {
+  @apply font-thin;
+  @apply text-center;
+}
