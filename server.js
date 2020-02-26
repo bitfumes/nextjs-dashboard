@@ -36,6 +36,12 @@ app
     server.use(cookieParser());
     server.use(authCheck);
 
+    server.get("/:mailinglist/members", (req, res) => {
+      return app.render(req, res, "/members", {
+        mailinglist: req.params.mailinglist
+      });
+    });
+
     server.get("*", (req, res) => {
       return handle(req, res);
     });

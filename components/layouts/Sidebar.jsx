@@ -24,6 +24,16 @@ const Sidebar = React.memo(() => {
   const [links, setlinks] = React.useState([
     { name: "Home", href: "/", icon: "fas fa-home" },
     {
+      name: "Mailing List",
+      href: "/mailinglist",
+      icon: "fas fa-user"
+    },
+    {
+      name: "Campaign",
+      href: "/campaigns",
+      icon: "fas fa-user"
+    },
+    {
       name: "Settings",
       items: linkSetting()
     }
