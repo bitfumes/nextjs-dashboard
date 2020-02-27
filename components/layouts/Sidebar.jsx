@@ -35,6 +35,16 @@ const Sidebar = React.memo(() => {
     },
     {
       name: "Settings",
+      items: [
+        {
+          name: "Active Service",
+          href: "/service",
+          icon: "fas fa-user"
+        }
+      ]
+    },
+    {
+      name: "Settings",
       items: linkSetting()
     }
   ]);

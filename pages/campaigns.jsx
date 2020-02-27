@@ -11,41 +11,42 @@ import { useRouter } from "next/router";
 
 function Campaigns({ items, meta }) {
   const [state, setState] = React.useState({ items, meta });
+  const [mailinglist, setMailinglist] = React.useState([]);
   const [{ user }, , { permitTo }] = React.useContext(AppContext);
-  const url = "/campaigns";
+
+  const url = "/campaign";
   const Initial = {
     title: "",
-    mailinglist_id: "",
+    mailinglist_ids: [],
     body: "",
     subject: "",
     from_email: "",
     from_name: "",
-    body: ""
+    body: "",
+    attachment: ""
   };
+
   const router = useRouter();
 
   const [errors, setErrors] = React.useState({});
   const [isOpen, setIsOpen] = React.useState(false);
   const [editedItem, setEditedItem] = React.useState(Initial);
   const [editedIndex, setEditedIndex] = React.useState(-1);
-  const [mailinglist, setMailinglist] = React.useState([]);
 
   React.useEffect(() => {
     axios
       .get("mailinglist/all")
-      .then(res => setMailinglist(res.data))
+      .then(res => {
+        setMailinglist(res.data);
+        if (res.data) {
+          setEditedItem({ ...editedItem, mailinglist_ids: [res.data[0].id] });
+        }
+      })
       .catch(e => console.log(e.response));
   }, []);
 
   function handleInput(e) {
-    if (e.target.type == "checkbox") {
-      setEditedItem({
-        ...editedItem,
-        [e.target.name]: e.target.value == "on" ? true : false
-      });
-    } else {
-      setEditedItem({ ...editedItem, [e.target.name]: e.target.value });
-    }
+    setEditedItem({ ...editedItem, [e.target.name]: e.target.value });
   }
 
   function calIndex(index) {
@@ -138,7 +139,7 @@ function Campaigns({ items, meta }) {
             <h1 className="text-xl float-left w-full">Add New Campaign</h1>
           </div>
 
-          <div className="flex justify-between py-3">
+          <div className="flex justify-between py-3 flex-wrap">
             <div className="w-full mx-1">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
@@ -158,51 +159,128 @@ function Campaigns({ items, meta }) {
               />
               <ErrorField name="title" errors={errors} />
             </div>
-          </div>
-
-          <div className="flex justify-between py-3">
             <div className="w-full mx-1">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
-                htmlFor="mailinglist_id"
+                htmlFor="mailinglist_ids"
                 style={{ textTransform: "capitalize" }}
               >
-                Title
+                Mailing List
               </label>
               <select
-                className="w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="mailinglist_id"
-                name="mailinglist_id"
+                className="w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="mailinglist_ids"
+                name="mailinglist_ids"
                 defaultValue={mailinglist.length > 0 ? mailinglist[0].id : 1}
                 onChange={handleInput}
               >
-                {mailinglist.map(list => (
-                  <option value={list.id}>{list.title}</option>
+                {mailinglist.map((list, i) => (
+                  <option value={list.id} key={i}>
+                    {list.title}
+                  </option>
                 ))}
               </select>
-              <ErrorField name="mailinglist_id" errors={errors} />
+              <ErrorField name="mailinglist_ids" errors={errors} />
             </div>
-          </div>
 
-          <div className="flex justify-between py-3">
             <div className="w-full mx-1">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
-                htmlFor="welcome_email"
+                htmlFor="from_name"
                 style={{ textTransform: "capitalize" }}
               >
-                Send Welcome Email
+                Name From
               </label>
               <input
-                className="bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="welcome_email"
-                type="checkbox"
-                name="welcome_email"
-                checked={!!editedItem.welcome_email}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="from_name"
+                type="text"
+                name="from_name"
+                value={editedItem.from_name}
                 onChange={handleInput}
-                placeholder="welcome_email"
+                placeholder="from_name"
               />
-              <ErrorField name="welcome_email" errors={errors} />
+              <ErrorField name="from_name" errors={errors} />
+            </div>
+
+            <div className="w-full mx-1">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
+                htmlFor="from_email"
+                style={{ textTransform: "capitalize" }}
+              >
+                Email From
+              </label>
+              <input
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="from_email"
+                type="text"
+                name="from_email"
+                value={editedItem.from_email}
+                onChange={handleInput}
+                placeholder="from_email"
+              />
+              <ErrorField name="from_email" errors={errors} />
+            </div>
+
+            <div className="w-full mx-1">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
+                htmlFor="subject"
+                style={{ textTransform: "capitalize" }}
+              >
+                Subject
+              </label>
+              <input
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="subject"
+                type="text"
+                name="subject"
+                value={editedItem.subject}
+                onChange={handleInput}
+                placeholder="subject"
+              />
+              <ErrorField name="subject" errors={errors} />
+            </div>
+
+            <div className="w-full mx-1">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
+                htmlFor="body"
+                style={{ textTransform: "capitalize" }}
+              >
+                Email Body
+              </label>
+              <textarea
+                name="body"
+                onChange={handleInput}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                rows="10"
+                placeholder="Write Your Email"
+                defaultValue={editedItem.body}
+              />
+              <ErrorField name="body" errors={errors} />
+            </div>
+
+            <div className="flex justify-between py-3">
+              <div className="w-full mx-1">
+                <label
+                  className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1"
+                  htmlFor="publish_at"
+                  style={{ textTransform: "capitalize" }}
+                >
+                  Schedule (optional)
+                </label>
+                <input
+                  className="bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  id="publish_at"
+                  type="date"
+                  name="publish_at"
+                  onChange={handleInput}
+                  placeholder="publish_at"
+                />
+                <ErrorField name="publish_at" errors={errors} />
+              </div>
             </div>
           </div>
         </Modal>
@@ -235,7 +313,7 @@ function Campaigns({ items, meta }) {
                   key={index}
                 >
                   <td className="py-3 border flex-1">{index + 1}</td>
-                  {/* <td className="py-3 border flex-1">{item.title}</td> */}
+                  <td className="py-3 border flex-1">{item.title}</td>
                   <td className="py-3 border flex-1">
                     {/* {item.welcome_email ? "True" : "False"} */}
                   </td>
